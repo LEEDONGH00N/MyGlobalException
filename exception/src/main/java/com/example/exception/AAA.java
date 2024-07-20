@@ -1,2 +1,4 @@
-package com.example.exception;public class AAA {
+package com.example.exception;
+
+public class AAA {
 }
