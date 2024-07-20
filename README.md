@@ -1,0 +1,1 @@
+# MyGlobalException
