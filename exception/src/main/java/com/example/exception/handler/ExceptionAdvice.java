@@ -1,173 +1,205 @@
 package com.example.exception.handler;
 
 import com.example.exception.common.BaseException;
-import com.example.exception.common.BaseResponse;
-import com.example.exception.common.codes.ErrorCode;
+import com.example.exception.common.ApiResponse;
+import static com.example.exception.common.codes.ErrorCode.*;
 import static com.example.exception.common.reason.Reason.*;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.beans.ConversionNotSupportedException;
+import org.springframework.beans.TypeMismatchException;
+import org.springframework.http.*;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.http.converter.HttpMessageNotWritableException;
+import org.springframework.web.ErrorResponseException;
+import org.springframework.web.HttpMediaTypeNotAcceptableException;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.MissingRequestHeaderException;
+import org.springframework.web.bind.MissingPathVariableException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.context.request.async.AsyncRequestTimeoutException;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.servlet.NoHandlerFoundException;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
-import java.io.IOException;
 
 @Slf4j
 @RestControllerAdvice(annotations = {RestController.class})
-public class ExceptionAdvice {
+public class ExceptionAdvice extends ResponseEntityExceptionHandler {
 
-    /**
-     * 바인딩 에러 처리
-     * @param e
-     * @return
-     */
-    @ExceptionHandler
-    public ResponseEntity<Object> validation(MethodArgumentNotValidException e) {
-        String message = e.getBindingResult().getFieldErrors().get(0).getDefaultMessage();
-        BaseResponse<?> baseResponse = BaseResponse.onFailure(ErrorCode.BINDING_ERROR.getCode(), message, null);
-        return handleExceptionInternal(baseResponse);
+    @Override
+    protected ResponseEntity<Object> handleHttpRequestMethodNotSupported(HttpRequestMethodNotSupportedException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        String message = ex.getMessage();
+        ApiResponse<?> baseResponse = ApiResponse.onFailure("METHOD_NOT_SUPPORTED", message, null);
+        return handleExceptionInternalFalse(baseResponse, status);
     }
 
-    /**
-     * 서버 에러
-     * @param e
-     * @return
-     */
+    @Override
+    protected ResponseEntity<Object> handleHttpMediaTypeNotSupported(HttpMediaTypeNotSupportedException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        String message = ex.getMessage();
+        ApiResponse<?> baseResponse = ApiResponse.onFailure("MEDIA_TYPE_NOT_SUPPORTED", message, null);
+        return handleExceptionInternalFalse(baseResponse, status);
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleHttpMediaTypeNotAcceptable(HttpMediaTypeNotAcceptableException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        String message = ex.getMessage();
+        ApiResponse<?> baseResponse = ApiResponse.onFailure("MEDIA_TYPE_NOT_ACCEPTABLE", message, null);
+        return handleExceptionInternalFalse(baseResponse, status);
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleMissingPathVariable(MissingPathVariableException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        String message = ex.getMessage();
+        ApiResponse<?> baseResponse = ApiResponse.onFailure("MISSING_PATH_VARIABLE", message, null);
+        return handleExceptionInternalFalse(baseResponse, status);
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleMissingServletRequestParameter(MissingServletRequestParameterException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        String message = ex.getMessage();
+        ApiResponse<?> baseResponse = ApiResponse.onFailure("MISSING_REQUEST_PARAMETER", message, null);
+        return handleExceptionInternalFalse(baseResponse, status);
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleMissingServletRequestPart(MissingServletRequestPartException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        String message = ex.getMessage();
+        ApiResponse<?> baseResponse = ApiResponse.onFailure("MISSING_REQUEST_PART", message, null);
+        return handleExceptionInternalFalse(baseResponse, status);
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleServletRequestBindingException(ServletRequestBindingException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        String message = ex.getMessage();
+        ApiResponse<?> baseResponse = ApiResponse.onFailure("REQUEST_BINDING_ERROR", message, null);
+        return handleExceptionInternalFalse(baseResponse, status);
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleHandlerMethodValidationException(HandlerMethodValidationException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        String message = ex.getMessage();
+        ApiResponse<?> baseResponse = ApiResponse.onFailure("HANDLER_METHOD_VALIDATION_ERROR", message, null);
+        return handleExceptionInternalFalse(baseResponse, status);
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleNoResourceFoundException(NoResourceFoundException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        String message = ex.getMessage();
+        ApiResponse<?> baseResponse = ApiResponse.onFailure("NO_RESOURCE_FOUND", message, null);
+        return handleExceptionInternalFalse(baseResponse, status);
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleAsyncRequestTimeoutException(AsyncRequestTimeoutException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        String message = ex.getMessage();
+        ApiResponse<?> baseResponse = ApiResponse.onFailure("ASYNC_REQUEST_TIMEOUT", message, null);
+        return handleExceptionInternalFalse(baseResponse, status);
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleErrorResponseException(ErrorResponseException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        String message = ex.getMessage();
+        ApiResponse<?> baseResponse = ApiResponse.onFailure("ERROR_RESPONSE_EXCEPTION", message, null);
+        return handleExceptionInternalFalse(baseResponse, status);
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleMaxUploadSizeExceededException(MaxUploadSizeExceededException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        String message = ex.getMessage();
+        ApiResponse<?> baseResponse = ApiResponse.onFailure("MAX_UPLOAD_SIZE_EXCEEDED", message, null);
+        return handleExceptionInternalFalse(baseResponse, status);
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleConversionNotSupported(ConversionNotSupportedException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        String message = ex.getMessage();
+        ApiResponse<?> baseResponse = ApiResponse.onFailure("CONVERSION_NOT_SUPPORTED", message, null);
+        return handleExceptionInternalFalse(baseResponse, status);
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleTypeMismatch(TypeMismatchException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        String message = ex.getMessage();
+        ApiResponse<?> baseResponse = ApiResponse.onFailure("TYPE_MISMATCH", message, null);
+        return handleExceptionInternalFalse(baseResponse, status);
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        String message = ex.getMessage();
+        ApiResponse<?> baseResponse = ApiResponse.onFailure("MESSAGE_NOT_READABLE", message, null);
+        return handleExceptionInternalFalse(baseResponse, status);
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleHttpMessageNotWritable(HttpMessageNotWritableException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        String message = ex.getMessage();
+        ApiResponse<?> baseResponse = ApiResponse.onFailure("MESSAGE_NOT_WRITABLE", message, null);
+        return handleExceptionInternalFalse(baseResponse, status);
+    }
+
+    @Override
+    protected ProblemDetail createProblemDetail(Exception ex, HttpStatusCode status, String defaultDetail, String detailMessageCode, Object[] detailMessageArguments, WebRequest request) {
+        String message = ex.getMessage();
+        return super.createProblemDetail(ex, status, defaultDetail, detailMessageCode, detailMessageArguments, request);
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleExceptionInternal(Exception ex, Object body, HttpHeaders headers, HttpStatusCode statusCode, WebRequest request) {
+        String message = ex.getMessage();
+        ApiResponse<?> baseResponse = ApiResponse.onFailure("INTERNAL_ERROR", message, null);
+        return handleExceptionInternalFalse(baseResponse,statusCode);
+    }
+
+
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException e, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        String message = e.getBindingResult().getFieldErrors().get(0).getDefaultMessage();
+        ApiResponse<?> baseResponse = ApiResponse.onFailure(BINDING_ERROR.getCode(), message, null);
+        return handleExceptionInternalFalse(baseResponse, status);
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleNoHandlerFoundException(NoHandlerFoundException e, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        ApiResponse<?> baseResponse = ApiResponse.onFailure(INTERNAL_SERVER_ERROR.getCode(), e.getMessage(), null);
+        return handleExceptionInternalFalse(baseResponse, status);
+    }
+
+//    @ExceptionHandler
+//    public ResponseEntity<Object> validation(MethodArgumentNotValidException e) {
+//        String message = e.getBindingResult().getFieldErrors().get(0).getDefaultMessage();
+//        BaseResponse<?> baseResponse = BaseResponse.onFailure(BINDING_ERROR.getCode(), message, null);
+//        return handleExceptionInternalFalse(baseResponse);
+//    }
+
+    @ExceptionHandler(BaseException.class)
+    public ResponseEntity<Object> onThrowException(BaseException baseException) {
+        ReasonDto errorReasonHttpStatus = baseException.getErrorReasonHttpStatus();
+        ApiResponse<?> apiResponse = ApiResponse.onFailure(errorReasonHttpStatus.getCode(), errorReasonHttpStatus.getMessage(), null);
+        return handleExceptionInternalFalse(apiResponse, errorReasonHttpStatus.getHttpStatus());
+    }
+
     @ExceptionHandler
     public ResponseEntity<Object> exception(Exception e) {
-        ErrorCode errorCode = ErrorCode._INTERNAL_SERVER_ERROR;
-        BaseResponse<?> baseResponse = BaseResponse.onFailure(errorCode.getCode(), errorCode.getMessage(), null);
-        return handleExceptionInternal(baseResponse);
+        ApiResponse<?> apiResponse = ApiResponse.onFailure(INTERNAL_SERVER_ERROR.getCode(), e.getMessage(), null);
+        return handleExceptionInternalFalse(apiResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    /**
-     * 클라이언트 에러
-     * @param generalException
-     * @return
-     */
-    @ExceptionHandler(BaseException.class)
-    public ResponseEntity<Object> onThrowException(BaseException generalException) {
-        ReasonDto errorReasonHttpStatus = generalException.getErrorReasonHttpStatus();
-        BaseResponse<?> baseResponse = BaseResponse.onFailure(errorReasonHttpStatus.getCode(), errorReasonHttpStatus.getMessage(), null);
-        return handleExceptionInternal(baseResponse);
+    private ResponseEntity<Object> handleExceptionInternalFalse(ApiResponse<?> response, HttpStatusCode statusCode) {
+        return new ResponseEntity<>(response, statusCode);
     }
-
-    /**
-     * [Exception] API 호출 시 'Header' 내에 데이터 값이 유효하지 않은 경우
-     *
-     * @param ex MissingRequestHeaderException
-     * @return ResponseEntity<ErrorResponse>
-     */
-    @ExceptionHandler(MissingRequestHeaderException.class)
-    protected ResponseEntity<Object> handleMissingRequestHeaderException(MissingRequestHeaderException ex) {
-        log.error("MissingRequestHeaderException", ex);
-
-        return handleExceptionInternal(ErrorCode.REQUEST_BODY_MISSING_ERROR);
-    }
-
-    /**
-     * [Exception] 클라이언트에서 Body로 '객체' 데이터가 넘어오지 않았을 경우
-     *
-     * @param ex HttpMessageNotReadableException
-     * @return ResponseEntity<ErrorResponse>
-     */
-    @ExceptionHandler
-    public ResponseEntity<Object> handleHttpMessageNotReadableException(
-            HttpMessageNotReadableException ex) {
-        log.info("HttpMessageNotReadableException", ex);
-        return handleExceptionInternal(ErrorCode.REQUEST_BODY_MISSING_ERROR);
-    }
-
-    /**
-     * [Exception] 클라이언트에서 request로 '파라미터로' 데이터가 넘어오지 않았을 경우
-     *
-     * @param ex MissingServletRequestParameterException
-     * @return ResponseEntity<ErrorResponse>
-     */
-    @ExceptionHandler(MissingServletRequestParameterException.class)
-    protected ResponseEntity<Object> handleMissingRequestHeaderExceptionException(
-            MissingServletRequestParameterException ex) {
-        log.error("handleMissingServletRequestParameterException", ex);
-        return handleExceptionInternal(ErrorCode.MISSING_REQUEST_PARAMETER_ERROR);
-    }
-
-
-    /**
-     * [Exception] 잘못된 서버 요청일 경우 발생한 경우
-     *
-     * @param e HttpClientErrorException
-     * @return ResponseEntity<ErrorResponse>
-     */
-    @ExceptionHandler(HttpClientErrorException.BadRequest.class)
-    protected ResponseEntity<Object> handleBadRequestException(HttpClientErrorException e) {
-        log.error("HttpClientErrorException.BadRequest", e);
-        return handleExceptionInternal(ErrorCode.BAD_REQUEST_ERROR);
-    }
-
-
-    /**
-     * [Exception] NULL 값이 발생한 경우
-     *
-     * @param e NullPointerException
-     * @return ResponseEntity<ErrorResponse>
-     */
-    @ExceptionHandler(NullPointerException.class)
-    protected ResponseEntity<Object> handleNullPointerException(NullPointerException e) {
-        log.error("handleNullPointerException", e);
-        return handleExceptionInternal(ErrorCode.NULL_POINT_ERROR);
-    }
-
-    /**
-     * Input / Output 내에서 발생한 경우
-     *
-     * @param ex IOException
-     * @return ResponseEntity<ErrorResponse>
-     */
-    @ExceptionHandler(IOException.class)
-    protected ResponseEntity<Object> handleIOException(IOException ex) {
-        log.error("handleIOException", ex);
-        return handleExceptionInternal(ErrorCode.IO_ERROR);
-    }
-
-    /**
-     * com.fasterxml.jackson.core 내에 Exception 발생하는 경우
-     *
-     * @param ex JsonProcessingException
-     * @return ResponseEntity<ErrorResponse>
-     */
-    @ExceptionHandler(JsonProcessingException.class)
-    protected ResponseEntity<Object> handleJsonProcessingException(JsonProcessingException ex) {
-        log.error("handleJsonProcessingException", ex);
-        return handleExceptionInternal(ErrorCode.REQUEST_BODY_MISSING_ERROR);
-    }
-
-    /**
-     * [Exception] 잘못된 주소로 요청 한 경우
-     *
-     * @param e NoHandlerFoundException
-     * @return ResponseEntity<ErrorResponse>
-     */
-    @ExceptionHandler(NoHandlerFoundException.class)
-    protected ResponseEntity<Object> handleNoHandlerFoundExceptionException(NoHandlerFoundException e) {
-        log.error("handleNoHandlerFoundExceptionException", e);
-        return handleExceptionInternal(ErrorCode.NOT_FOUND_ERROR);
-    }
-
-    private ResponseEntity<Object> handleExceptionInternal(BaseResponse<?> response) {
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
-    private ResponseEntity<Object> handleExceptionInternal(ErrorCode errorCommonStatus) {
-        BaseResponse<?> baseResponse = BaseResponse.onFailure(errorCommonStatus.getCode(), errorCommonStatus.getMessage(), null);
-        return new ResponseEntity<>(baseResponse, HttpStatus.OK);
-    }
+//
+//    private ResponseEntity<Object> handleExceptionInternal(ErrorCode errorCommonStatus) {
+//        BaseResponse<?> baseResponse = BaseResponse.onFailure(errorCommonStatus.getCode(), errorCommonStatus.getMessage(), null);
+//        return new ResponseEntity<>(baseResponse, HttpStatus.OK);
+//    }
 }
